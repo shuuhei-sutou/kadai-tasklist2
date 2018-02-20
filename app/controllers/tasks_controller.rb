@@ -1,6 +1,8 @@
 class TasksController < ApplicationController
+  
   def index
-    @tasks=Task.all
+    @task=Task.new
+    @tasks = current_user.tasks.order('created_at').page(params[:page])
   end
 
   def show
@@ -13,13 +15,15 @@ class TasksController < ApplicationController
 
   def create
     @task = Task.new(task_params)
+    @task.user = current_user
 
     if @task.save
       flash[:success] = 'Task が正常に追加されました'
-      redirect_to @task
+      redirect_to :tasks
     else
+      @tasks = current_user.tasks.paginate(:page => params[:page])
       flash.now[:danger] = 'Task が追加されませんでした'
-      render :new
+      render :action => 'index'
     end
   end
 
